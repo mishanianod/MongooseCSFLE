@@ -51,7 +51,7 @@ async function main() {
     }
   });
   
-  const Model = mongoose.model('Karan', mongoose.Schema({ name: String }));
+  const Model = mongoose.model('SampleModel', mongoose.Schema({ name: String }));
   await Model.create({ name: 'Hello World!' });
 }
 
