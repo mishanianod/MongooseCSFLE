@@ -18,21 +18,24 @@ const keyVaultNamespace = 'client.encryption';
 const kmsProviders = { local: { key } };
 
 async function main() {
-  await mongoose.connect('ATLAS_URL', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    // Configure auto encryption
-    autoEncryption: {
-      keyVaultNamespace, 
-      kmsProviders
+  await mongoose.connect(
+    'mongodb+srv://testproduser:vJcgAmw1HD5KnNyh@employeedomaincluster.2l9uo.mongodb.net/?retryWrites=true&w=majority',
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      // Configure auto encryption
+      autoEncryption: {
+        keyVaultNamespace,
+        kmsProviders,
+      },
     }
-  });
-  
+  );
+
   const encryption = new ClientEncryption(mongoose.connection.client, {
-      keyVaultNamespace,
-      kmsProviders,
+    keyVaultNamespace,
+    kmsProviders,
   });
-  
+
   const __key__ = await encryption.createDataKey('local');
   await mongoose.connection.dropCollection('testColl').catch(() => {});
   await mongoose.connection.createCollection('testColl', {
@@ -44,15 +47,19 @@ async function main() {
             encrypt: {
               bsonType: 'string',
               keyId: [__key__],
-              algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic' }
-          }
-        }
-      }
-    }
+              algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic',
+            },
+          },
+        },
+      },
+    },
   });
-  
-  const Model = mongoose.model('SampleModel', mongoose.Schema({ name: String }));
+
+  const Model = mongoose.model(
+    'SampleModel',
+    mongoose.Schema({ name: String })
+  );
   await Model.create({ name: 'Hello World!' });
 }
 
-main().catch(console.log)
+main().catch(console.log);
