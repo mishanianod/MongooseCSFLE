@@ -16,21 +16,21 @@ function getEncryptionKey() {
 const key = getEncryptionKey();
 const keyVaultNamespace = 'client.encryption';
 const kmsProviders = { local: { key } };
-
+const uriDev =
+  'mongodb+srv://oddevuser:WZ9XPV81P6_gvcXhs@employeedomaincluster.2l9uo.mongodb.net/employeeDomain?retryWrites=true&w=majority';
+const uriProd =
+  'mongodb+srv://testproduser:vJcgAmw1HD5KnNyh@employeedomaincluster.2l9uo.mongodb.net/employeeDomainProd?retryWrites=true&w=majority';
 async function main() {
   await mongoose
-    .connect(
-      'mongodb+srv://testproduser:vJcgAmw1HD5KnNyh@employeedomaincluster.2l9uo.mongodb.net/employeeDomain?retryWrites=true&w=majority',
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        // Configure auto encryption
-        autoEncryption: {
-          keyVaultNamespace,
-          kmsProviders,
-        },
-      }
-    )
+    .connect(uriDev, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      // Configure auto encryption
+      autoEncryption: {
+        keyVaultNamespace,
+        kmsProviders,
+      },
+    })
     .then(
       () => {
         console.log(
