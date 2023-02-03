@@ -22,13 +22,17 @@ const uriProd =
   'mongodb+srv://testproduser:vJcgAmw1HD5KnNyh@employeedomaincluster.2l9uo.mongodb.net/employeeDomainProd?retryWrites=true&w=majority';
 async function main() {
   await mongoose
-    .connect(uriDev, {
+    .connect(uriProd, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       // Configure auto encryption
       autoEncryption: {
         keyVaultNamespace,
         kmsProviders,
+        extraOptions: {
+          cryptSharedLibPath: uriProd,
+          cryptSharedLibRequired: true,
+        },
       },
     })
     .then(
@@ -48,8 +52,8 @@ async function main() {
   });
 
   const __key__ = await encryption.createDataKey('local');
-  await mongoose.connection.dropCollection('testColl').catch(() => {});
-  await mongoose.connection.createCollection('testColl', {
+  await mongoose.connection.dropCollection('csfles').catch(() => {});
+  await mongoose.connection.createCollection('csfles', {
     validator: {
       $jsonSchema: {
         bsonType: 'object',
@@ -66,10 +70,7 @@ async function main() {
     },
   });
 
-  const Model = mongoose.model(
-    'SampleModel',
-    mongoose.Schema({ name: String })
-  );
+  const Model = mongoose.model('csfle', mongoose.Schema({ name: String }));
   await Model.create({ name: 'Hello World!' });
 }
 
