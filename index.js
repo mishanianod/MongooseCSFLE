@@ -16,23 +16,22 @@ function getEncryptionKey() {
 const key = getEncryptionKey();
 const keyVaultNamespace = 'client.encryption';
 const kmsProviders = { local: { key } };
-const uriDev =
-  'mongodb+srv://oddevuser:WZ9XPV81P6_gvcXhs@employeedomaincluster.2l9uo.mongodb.net/employeeDomain?retryWrites=true&w=majority';
-const uriProd =
-  'mongodb+srv://testproduser:vJcgAmw1HD5KnNyh@employeedomaincluster.2l9uo.mongodb.net/employeeDomainProd?retryWrites=true&w=majority';
+const uriDev = process.env.CONN_STRING;
+
 async function main() {
   await mongoose
-    .connect(uriProd, {
+    .connect(uriDev, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+
       // Configure auto encryption
       autoEncryption: {
         keyVaultNamespace,
         kmsProviders,
         extraOptions: {
-          cryptSharedLibPath: uriProd,
-          cryptSharedLibRequired: true,
-        },
+          cryptSharedLibPath: "mongo_crypt_v1_ubuntu.so",
+          cryptSharedLibRequired: true
+        }
       },
     })
     .then(
@@ -42,7 +41,7 @@ async function main() {
         );
       },
       (err) => {
-        console.error({ message: err.message, metaData: err.stack });
+        console.error(err);
       }
     );
 
@@ -51,8 +50,9 @@ async function main() {
     kmsProviders,
   });
 
+
   const __key__ = await encryption.createDataKey('local');
-  await mongoose.connection.dropCollection('csfles').catch(() => {});
+  await mongoose.connection.dropCollection('csfles').catch(() => { });
   await mongoose.connection.createCollection('csfles', {
     validator: {
       $jsonSchema: {
@@ -70,8 +70,11 @@ async function main() {
     },
   });
 
-  const Model = mongoose.model('csfle', mongoose.Schema({ name: String }));
-  await Model.create({ name: 'Hello World!' });
+  const Model = mongoose.model(
+    'csfle',
+    mongoose.Schema({ name: String })
+  );
+  await Model.create({ name: "Hello World!" });
 }
 
-main().catch(console.log);
+main().then(console.log).catch(console.error);
